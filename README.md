@@ -9,12 +9,15 @@
 First, download dataset, preprocess it and train a model.
 
 ```bash
-TODO
+$ kaggle competitions download jigsaw-toxic-comment-classification-challenge
+$ unzip train.csv.zip
+$ jupyter nbconvert --execute ./dataset.ipynb
+$ python3 ./train.py
 ```
 After these steps you will be able to run flask server
 
 ```bash
-TODO
+$ python3 ./server.py
 ```
 
 Example of server response goes below:
