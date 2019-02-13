@@ -4,6 +4,8 @@
 
 *Prepared for Social Weekend Hackaton 13*
 
+Related to [the extension](https://github.com/lexaich/SNAT)
+
 # Deployment and usage
 
 First, download dataset, preprocess it and train a model.
