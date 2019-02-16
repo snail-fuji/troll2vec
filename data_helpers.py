@@ -10,11 +10,27 @@ Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
 
 
+ip_regex = re.compile("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
+time_regex = re.compile("")
+symbols_regex = re.compile("([.?!,:\"]+)")
+spaces_regex = re.compile("\s+")
+brackets_regex = re.compile("[()]")
+
+def preprocess_comment(comment):
+    comment = ip_regex.sub("", comment)
+    comment = comment.replace("\n", " ").lower()
+    comment = symbols_regex.sub(" \\1 ", comment)
+    comment = brackets_regex.sub(" ", comment)
+    comment = spaces_regex.sub(" ", comment)
+    return comment.strip()
+
+
 def clean_str(string):
     """
     Tokenization/string cleaning for all datasets except for SST.
     Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     """
+    string = preprocess_comment(string)
     string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
     string = re.sub(r"\'s", " \'s", string)
     string = re.sub(r"\'ve", " \'ve", string)
