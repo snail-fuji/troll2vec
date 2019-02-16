@@ -112,8 +112,8 @@ def pad_sentences(sentences, padding_word="<PAD/>", sequence_length=None):
     padded_sentences = []
     for i in tqdm(range(len(sentences)), desc="padding sentences"):
         sentence = sentences[i]
-        num_padding = sequence_length - len(sentence)
-        new_sentence = sentence + [padding_word] * num_padding
+        num_padding = max(sequence_length - len(sentence), 0)
+        new_sentence = (sentence + [padding_word] * num_padding)[0:sequence_length]
         padded_sentences.append(new_sentence)
     return padded_sentences, sequence_length
 
