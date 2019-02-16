@@ -23,8 +23,10 @@ def process_sentences(sentences):
 
 def prepare_sentences(sentences, vocabulary, max_length):
   sentences_processed = process_sentences(sentences)
+  print(sentences_processed)
   sentences_padded, _ = pad_sentences(sentences_processed, sequence_length=max_length)
   x, _ = build_input_data(sentences_padded, 0, vocabulary)
+  print(x)
   return x
 
 def predict(sentences):

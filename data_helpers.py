@@ -4,7 +4,8 @@ import itertools
 from collections import Counter
 import pdb
 from tqdm import tqdm
-
+from fuzzywuzzy import fuzz
+import numpy as np
 """
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
@@ -98,11 +99,24 @@ def build_vocab(sentences):
     return [vocabulary, vocabulary_inv]
 
 
+def find_word(vocabulary, word):
+    if word in vocabulary:
+        return vocabulary[word]
+    else:
+        ratios = [fuzz.ratio(word, key) for key in vocabulary]
+        best_word_index = np.argmax(ratios)
+        best_word = list(vocabulary.keys())[best_word_index]
+        print(word, best_word)
+        return vocabulary[best_word]
+        
+
+
 def build_input_data(sentences, labels, vocabulary):
     """
     Maps sentencs and labels to vectors based on a vocabulary.
     """
-    x = np.array([[vocabulary[word] for word in sentence] for sentence in tqdm(sentences, desc="indexing sentences")])
+
+    x = np.array([[find_word(vocabulary, word) for word in sentence] for sentence in tqdm(sentences, desc="indexing sentences")])
     y = np.array(labels)
     return [x, y]
 
