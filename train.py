@@ -44,7 +44,7 @@ model_type = "CNN-non-static"  # CNN-rand|CNN-non-static|CNN-static
 data_source = "local_dir"  # keras_data_set|local_dir
 
 # Model Hyperparameters
-embedding_dim = 50
+embedding_dim = 300
 filter_sizes = (3, 8)
 num_filters = 10
 dropout_prob = (0.5, 0.8)
@@ -178,4 +178,4 @@ if model_type == "CNN-non-static":
 
 # Train the model
 model.fit(x_train, y_train, batch_size=batch_size, epochs=num_epochs,
-          validation_data=(x_test, y_test), verbose=2, callbacks=[ModelCheckpoint('model.h5py')])
+          validation_data=(x_test, y_test), verbose=2, callbacks=[ModelCheckpoint('model-rus.h5py')])

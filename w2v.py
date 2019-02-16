@@ -1,9 +1,11 @@
 from __future__ import print_function
 from gensim.models import word2vec
+import gensim.downloader as api
 from os.path import join, exists, split
 import os
 import numpy as np
 
+rus = True
 
 def train_word2vec(sentence_matrix, vocabulary_inv,
                    num_features=300, min_word_count=1, context=10):
@@ -21,7 +23,10 @@ def train_word2vec(sentence_matrix, vocabulary_inv,
     model_dir = 'models'
     model_name = "{:d}features_{:d}minwords_{:d}context".format(num_features, min_word_count, context)
     model_name = join(model_dir, model_name)
-    if exists(model_name):
+    if rus:
+        embedding_model = api.load('word2vec-ruscorpora-300')
+        print('Load russian Word2Vec model')
+    elif exists(model_name):
         embedding_model = word2vec.Word2Vec.load(model_name)
         print('Load existing Word2Vec model \'%s\'' % split(model_name)[-1])
     else:

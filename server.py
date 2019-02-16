@@ -21,7 +21,7 @@ def predict():
   if values:
     toxicity = predictions.predict(values)
     print(toxicity)
-    toxic_messages = [keys[index] for index, toxic in enumerate(toxicity) if toxic]
+    toxic_messages = [keys[index] for index, toxic in enumerate(toxicity) if not toxic]
     return jsonify(toxic_messages)
   else:
     return jsonify([])

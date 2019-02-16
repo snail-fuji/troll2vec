@@ -1,10 +1,10 @@
 from keras.models import load_model
-from data_helpers import pad_sentences, build_vocab, build_input_data, clean_str
+from data_helpers import pad_sentences, build_vocab, build_input_data, clean_str, lemmatize_text
 import json
 
-model_path = './model.h5py'
+model_path = './model-rus.h5py'
 parameters_path = './parameters.json'
-test_sentences = ["I hate this fuckin' bullshit you moron", "Hey, that sounds really nice!"]
+test_sentences = ["что это за ерунда на шебм"]
 threshold = 0.5
 
 def read_model(path):
@@ -19,7 +19,7 @@ def make_predictions(model, sentences):
   return model.predict(sentences).reshape(-1) > threshold
 
 def process_sentences(sentences):
-  return [clean_str(s.strip()).split() for s in sentences]
+  return [lemmatize_text(clean_str(s.strip()))[:-2].lower().split() for s in sentences]
 
 def prepare_sentences(sentences, vocabulary, max_length):
   sentences_processed = process_sentences(sentences)

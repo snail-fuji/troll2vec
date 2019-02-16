@@ -6,6 +6,7 @@ import pdb
 from tqdm import tqdm
 from fuzzywuzzy import fuzz
 import numpy as np
+from pymystem3 import Mystem
 """
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
@@ -16,6 +17,38 @@ time_regex = re.compile("")
 symbols_regex = re.compile("([.?!,:\"]+)")
 spaces_regex = re.compile("\s+")
 brackets_regex = re.compile("[()]")
+m = Mystem()
+
+def word_description(word):
+    analysis = m.analyze(word)
+    try:
+        main_info = analysis[0]['analysis'][0]['gr']
+        parts = {
+            "SPRO": "PNOUN", 
+            "ADV": "ADV", 
+            "CONJ": "CCONJ", 
+            "PART": "PART", 
+            "INTJ": "INTJ", 
+            "PR": "PRON", 
+            "A": "ADJ",
+            "S": "NOUN", 
+            "V": "VERB",
+            "NUM": "NUM"
+        }
+        for part in parts:
+            if part in main_info:
+                return "_" + parts[part]
+    except:
+        pass
+    return ""
+
+
+def lemmatize_text(text):
+    string = []
+    for word in m.lemmatize(text):
+        string.append("{}{}".format(word, word_description(word)))
+    return " ".join(string)
+
 
 def preprocess_comment(comment):
     comment = ip_regex.sub("", comment)
@@ -32,7 +65,7 @@ def clean_str(string):
     Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     """
     string = preprocess_comment(string)
-    string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
+    string = re.sub(r"[^A-Za-zА-Яа-я0-9(),!?\'\`\_]", " ", string)
     string = re.sub(r"\'s", " \'s", string)
     string = re.sub(r"\'ve", " \'ve", string)
     string = re.sub(r"n\'t", " n\'t", string)
@@ -110,7 +143,6 @@ def find_word(vocabulary, word):
         return vocabulary[best_word]
         
 
-
 def build_input_data(sentences, labels, vocabulary):
     """
     Maps sentencs and labels to vectors based on a vocabulary.
@@ -119,6 +151,7 @@ def build_input_data(sentences, labels, vocabulary):
     x = np.array([[find_word(vocabulary, word) for word in sentence] for sentence in tqdm(sentences, desc="indexing sentences")])
     y = np.array(labels)
     return [x, y]
+
 
 def load_data():
     """
