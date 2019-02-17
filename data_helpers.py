@@ -7,6 +7,8 @@ from tqdm import tqdm
 from fuzzywuzzy import fuzz
 import numpy as np
 from pymystem3 import Mystem
+
+from nltk.corpus import stopwords
 """
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
@@ -18,6 +20,19 @@ symbols_regex = re.compile("([.?!,:\"]+)")
 spaces_regex = re.compile("\s+")
 brackets_regex = re.compile("[()]")
 m = Mystem()
+word_regex = re.compile("[^А-Яа-я]+")
+stop_words = stopwords.words('russian')
+MIN_LENGTH = 2
+
+def remove_stopwords(text):
+    return [word for word in text if word not in stop_words]
+
+def remove_short_words(text):
+    word_regex = re.compile("[^А-Яа-я]+")
+    return [
+        word for word in text 
+        if len(word_regex.sub("", word)) > MIN_LENGTH
+    ]
 
 def word_description(word):
     analysis = m.analyze(word)

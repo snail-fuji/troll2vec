@@ -1,10 +1,13 @@
 from keras.models import load_model
-from data_helpers import pad_sentences, build_vocab, build_input_data, clean_str, lemmatize_text
+from data_helpers import pad_sentences, build_vocab, build_input_data, clean_str, lemmatize_text, remove_stopwords, remove_short_words
 import json
 
 model_path = './model-rus.h5py'
 parameters_path = './parameters.json'
-test_sentences = ["что это за ерунда на шебм"]
+test_sentences = [""]
+
+# remove stopwords
+# remove short words
 
 def read_model(path):
   model = load_model(path)
@@ -23,6 +26,7 @@ def process_sentences(sentences):
 def prepare_sentences(sentences, vocabulary, max_length):
   sentences_processed = process_sentences(sentences)
   print(sentences_processed)
+  sentences_processed = [remove_short_words(remove_stopwords(sentence)) for sentence in sentences_processed]
   sentences_padded, _ = pad_sentences(sentences_processed, sequence_length=max_length)
   x, _ = build_input_data(sentences_padded, 0, vocabulary)
   print(x)
