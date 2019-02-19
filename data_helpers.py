@@ -7,6 +7,8 @@ from tqdm import tqdm
 from fuzzywuzzy import fuzz
 import numpy as np
 from pymystem3 import Mystem
+
+from nltk.corpus import stopwords
 """
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
@@ -18,6 +20,19 @@ symbols_regex = re.compile("([.?!,:\"]+)")
 spaces_regex = re.compile("\s+")
 brackets_regex = re.compile("[()]")
 m = Mystem()
+word_regex = re.compile("[^А-Яа-я]+")
+stop_words = stopwords.words('russian')
+MIN_LENGTH = 2
+
+def remove_stopwords(text):
+    return [word for word in text if word not in stop_words]
+
+def remove_short_words(text):
+    word_regex = re.compile("[^А-Яа-я]+")
+    return [
+        word for word in text 
+        if len(word_regex.sub("", word)) > MIN_LENGTH
+    ]
 
 def word_description(word):
     analysis = m.analyze(word)
@@ -112,8 +127,8 @@ def pad_sentences(sentences, padding_word="<PAD/>", sequence_length=None):
     padded_sentences = []
     for i in tqdm(range(len(sentences)), desc="padding sentences"):
         sentence = sentences[i]
-        num_padding = sequence_length - len(sentence)
-        new_sentence = sentence + [padding_word] * num_padding
+        num_padding = max(sequence_length - len(sentence), 0)
+        new_sentence = (sentence + [padding_word] * num_padding)[0:sequence_length]
         padded_sentences.append(new_sentence)
     return padded_sentences, sequence_length
 
