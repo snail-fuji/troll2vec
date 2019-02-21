@@ -30,6 +30,8 @@ from keras.datasets import imdb
 from keras.preprocessing import sequence
 
 from keras.callbacks import ModelCheckpoint
+from utils import auc_roc
+from utils import CenterLossLayer
 
 import json
 
@@ -39,6 +41,8 @@ np.random.seed(0)
 #
 # Model type. See Kim Yoon's Convolutional Neural Networks for Sentence Classification, Section 3
 model_type = "CNN-non-static"  # CNN-rand|CNN-non-static|CNN-static
+
+model_path = 'model-center-loss.h5py'
 
 # Data source
 data_source = "local_dir"  # keras_data_set|local_dir
@@ -51,7 +55,7 @@ dropout_prob = (0.5, 0.8)
 hidden_dims = 50
 
 # Training parameters
-batch_size = 64
+batch_size = 256
 num_epochs = 10 # Change on production
 
 # Prepossessing parameters
@@ -102,80 +106,82 @@ def load_data(data_source):
 
     return x_train, y_train, x_test, y_test, vocabulary_inv, max_length
 
-# Data Preparation
-print("Load data...")
-x_train, y_train, x_test, y_test, vocabulary_inv, max_length = load_data(data_source)
+if __name__ == "__main__":
+    # Data Preparation
+    print("Load data...")
+    x_train, y_train, x_test, y_test, vocabulary_inv, max_length = load_data(data_source)
 
-# Save model parameters
-save_parameters(vocabulary_inv, max_length)
+    # Save model parameters
+    save_parameters(vocabulary_inv, max_length)
 
-if sequence_length != x_test.shape[1]:
-    print("Adjusting sequence length for actual size")
-    sequence_length = x_test.shape[1]
+    if sequence_length != x_test.shape[1]:
+        print("Adjusting sequence length for actual size")
+        sequence_length = x_test.shape[1]
 
-print("x_train shape:", x_train.shape)
-print("x_test shape:", x_test.shape)
-print("Vocabulary Size: {:d}".format(len(vocabulary_inv)))
+    print("x_train shape:", x_train.shape)
+    print("x_test shape:", x_test.shape)
+    print("Vocabulary Size: {:d}".format(len(vocabulary_inv)))
 
-# Prepare embedding layer weights and convert inputs for static model
-print("Model type is", model_type)
-if model_type in ["CNN-non-static", "CNN-static"]:
-    embedding_weights = train_word2vec(np.vstack((x_train, x_test)), vocabulary_inv, num_features=embedding_dim,
-                                       min_word_count=min_word_count, context=context)
+    # Prepare embedding layer weights and convert inputs for static model
+    print("Model type is", model_type)
+    if model_type in ["CNN-non-static", "CNN-static"]:
+        embedding_weights = train_word2vec(np.vstack((x_train, x_test)), vocabulary_inv, num_features=embedding_dim,
+                                           min_word_count=min_word_count, context=context)
+        if model_type == "CNN-static":
+            x_train = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_train])
+            x_test = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_test])
+            print("x_train static shape:", x_train.shape)
+            print("x_test static shape:", x_test.shape)
+
+    elif model_type == "CNN-rand":
+        embedding_weights = None
+    else:
+        raise ValueError("Unknown model type")
+
+    # Build model
     if model_type == "CNN-static":
-        x_train = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_train])
-        x_test = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_test])
-        print("x_train static shape:", x_train.shape)
-        print("x_test static shape:", x_test.shape)
+        input_shape = (sequence_length, embedding_dim)
+    else:
+        input_shape = (sequence_length,)
 
-elif model_type == "CNN-rand":
-    embedding_weights = None
-else:
-    raise ValueError("Unknown model type")
+    model_input = Input(shape=input_shape)
 
-# Build model
-if model_type == "CNN-static":
-    input_shape = (sequence_length, embedding_dim)
-else:
-    input_shape = (sequence_length,)
+    # Static model does not have embedding layer
+    if model_type == "CNN-static":
+        z = model_input
+    else:
+        z = Embedding(len(vocabulary_inv), embedding_dim, input_length=sequence_length, name="embedding")(model_input)
 
-model_input = Input(shape=input_shape)
+    z = Dropout(dropout_prob[0])(z)
 
-# Static model does not have embedding layer
-if model_type == "CNN-static":
-    z = model_input
-else:
-    z = Embedding(len(vocabulary_inv), embedding_dim, input_length=sequence_length, name="embedding")(model_input)
+    # Convolutional block
+    conv_blocks = []
+    for sz in filter_sizes:
+        conv = Convolution1D(filters=num_filters,
+                             kernel_size=sz,
+                             padding="valid",
+                             activation="relu",
+                             strides=1)(z)
+        conv = MaxPooling1D(pool_size=2)(conv)
+        conv = Flatten()(conv)
+        conv_blocks.append(conv)
+    z = Concatenate()(conv_blocks) if len(conv_blocks) > 1 else conv_blocks[0]
 
-z = Dropout(dropout_prob[0])(z)
+    z = Dropout(dropout_prob[1])(z)
+    z = Dense(hidden_dims, activation="relu")(z)
 
-# Convolutional block
-conv_blocks = []
-for sz in filter_sizes:
-    conv = Convolution1D(filters=num_filters,
-                         kernel_size=sz,
-                         padding="valid",
-                         activation="relu",
-                         strides=1)(z)
-    conv = MaxPooling1D(pool_size=2)(conv)
-    conv = Flatten()(conv)
-    conv_blocks.append(conv)
-z = Concatenate()(conv_blocks) if len(conv_blocks) > 1 else conv_blocks[0]
+    model_output = Dense(1, activation="sigmoid")(z)
 
-z = Dropout(dropout_prob[1])(z)
-z = Dense(hidden_dims, activation="relu")(z)
-model_output = Dense(1, activation="sigmoid")(z)
+    model = Model(model_input, model_output)
+    model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy", auc_roc])
 
-model = Model(model_input, model_output)
-model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+    # Initialize weights with word2vec
+    if model_type == "CNN-non-static":
+        weights = np.array([v for v in embedding_weights.values()])
+        print("Initializing embedding layer with word2vec weights, shape", weights.shape)
+        embedding_layer = model.get_layer("embedding")
+        embedding_layer.set_weights([weights])
 
-# Initialize weights with word2vec
-if model_type == "CNN-non-static":
-    weights = np.array([v for v in embedding_weights.values()])
-    print("Initializing embedding layer with word2vec weights, shape", weights.shape)
-    embedding_layer = model.get_layer("embedding")
-    embedding_layer.set_weights([weights])
-
-# Train the model
-model.fit(x_train, y_train, batch_size=batch_size, epochs=num_epochs,
-          validation_data=(x_test, y_test), verbose=2, callbacks=[ModelCheckpoint('model.h5py')])
+    # Train the model
+    model.fit(x_train, y_train, batch_size=batch_size, epochs=num_epochs,
+              validation_data=(x_test, y_test), verbose=1, callbacks=[ModelCheckpoint(model_path)])

@@ -2,9 +2,14 @@ from keras.models import load_model
 from data_helpers import pad_sentences, build_vocab, build_input_data, clean_str
 import json
 
-model_path = './model.h5py'
+
+import keras.metrics
+from utils import auc_roc
+from train import model_path
+keras.metrics.auc_roc = auc_roc
+
 parameters_path = './parameters.json'
-test_sentences = ["I hate this fuckin' bullshit you moron", "Hey, that sounds really nice!"]
+test_sentences = ["All people are equal", "All people are equal except niggers", "All people are equal except white"]
 threshold = 0.5
 
 def read_model(path):
@@ -22,11 +27,10 @@ def process_sentences(sentences):
   return [clean_str(s.strip()).split() for s in sentences]
 
 def prepare_sentences(sentences, vocabulary, max_length):
+  print(sentences)
   sentences_processed = process_sentences(sentences)
-  print(sentences_processed)
   sentences_padded, _ = pad_sentences(sentences_processed, sequence_length=max_length)
   x, _ = build_input_data(sentences_padded, 0, vocabulary)
-  print(x)
   return x
 
 def predict(sentences):

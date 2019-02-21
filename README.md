@@ -24,13 +24,8 @@ $ python3 ./server.py
 
 Example of server response goes below:
 ```bash
-$ curl -XPOST -d '{"messages": ["Your mom is so fat", "Your mom is so cool"]}' localhost:5000/api
-{
-  "toxicity": [
-    true, 
-    false
-  ]
-}
+$ curl -XPOST -d '{"id1": "Your mom is so fat", "id2": "Your mom is so cool"}' localhost:5000/api
+["id1"]
 ```
 
 # Convolutional neural network
