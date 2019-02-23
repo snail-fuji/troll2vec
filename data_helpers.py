@@ -108,7 +108,7 @@ def build_input_data(sentences, labels, vocabulary):
     """
     Maps sentencs and labels to vectors based on a vocabulary.
     """
-
+    typos.init(vocabulary)
     x = np.array([[find_word(word) for word in sentence] for sentence in tqdm(sentences, desc="indexing sentences")])
     y = np.array(labels)
     return [x, y]

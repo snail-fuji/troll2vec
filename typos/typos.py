@@ -8,9 +8,10 @@ def jaccard(set1, set2):
 
 def init(init_vocabulary):
     global vocabulary, all_words, all_sets
-    vocabulary = init_vocabulary
-    all_words = list(vocabulary.keys())
-    all_sets = [set(word) for word in vocabulary]
+    if not vocabulary:
+      vocabulary = init_vocabulary
+      all_words = list(vocabulary.keys())
+      all_sets = [set(word) for word in vocabulary]
 
 def find_closest_by_jaccard(word, size=1000):
     global all_sets, all_words
