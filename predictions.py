@@ -6,6 +6,7 @@ import tensorflow as tf
 import keras.metrics
 from utils import auc_roc
 from train import model_path, parameters_path
+from typos import typos
 
 keras.metrics.auc_roc = auc_roc
 
@@ -49,6 +50,7 @@ def init():
   global model, vocabulary, max_length, graph
   model = read_model(model_path)
   vocabulary, max_length = read_parameters(parameters_path)
+  typos.init(vocabulary)
   graph = prepare_graph()  
 
 if __name__ == "__main__":

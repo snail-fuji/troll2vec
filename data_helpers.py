@@ -6,7 +6,7 @@ import pdb
 from tqdm import tqdm
 from fuzzywuzzy import fuzz
 import numpy as np
-import distance
+from typos import typos 
 """
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
@@ -100,20 +100,8 @@ def build_vocab(sentences):
     return [vocabulary, vocabulary_inv]
 
 
-def find_word(vocabulary, word):
-    if word in vocabulary:
-        return vocabulary[word]
-    else:
-        all_words = list(vocabulary.keys())
-        distances = sorted(distance.ifast_comp(word, all_words))
-        if not distances:
-            distances = sorted(distance.ilevenshtein(word, all_words, max_dist=len(word) // 2))
-        if not distances:
-            distances = [(0, all_words[0])]
-        best_word = distances[0][1]
-        print(word, best_word)
-        return vocabulary[best_word]
-        
+def find_word(word):
+    return typos.find_closest(word)        
 
 
 def build_input_data(sentences, labels, vocabulary):
@@ -121,7 +109,7 @@ def build_input_data(sentences, labels, vocabulary):
     Maps sentencs and labels to vectors based on a vocabulary.
     """
 
-    x = np.array([[find_word(vocabulary, word) for word in sentence] for sentence in tqdm(sentences, desc="indexing sentences")])
+    x = np.array([[find_word(word) for word in sentence] for sentence in tqdm(sentences, desc="indexing sentences")])
     y = np.array(labels)
     return [x, y]
 
