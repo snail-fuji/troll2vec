@@ -20,11 +20,11 @@ def predict():
   values = [messages[key] for key in keys]
   if values:
     toxicity = predictions.predict(values)
-    print(toxicity)
-    toxic_messages = [keys[index] for index, toxic in enumerate(toxicity) if toxic]
+    toxic_messages = {keys[index]: float(toxic) for index, toxic in enumerate(toxicity)}
     return jsonify(toxic_messages)
   else:
     return jsonify([])
 
 if __name__ == '__main__':
+  predictions.init()
   app.run(port=5000, debug=True)

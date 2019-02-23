@@ -6,6 +6,7 @@ import pdb
 from tqdm import tqdm
 from fuzzywuzzy import fuzz
 import numpy as np
+import distance
 """
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
@@ -103,9 +104,13 @@ def find_word(vocabulary, word):
     if word in vocabulary:
         return vocabulary[word]
     else:
-        ratios = [fuzz.ratio(word, key) for key in vocabulary]
-        best_word_index = np.argmax(ratios)
-        best_word = list(vocabulary.keys())[best_word_index]
+        all_words = list(vocabulary.keys())
+        distances = sorted(distance.ifast_comp(word, all_words))
+        if not distances:
+            distances = sorted(distance.ilevenshtein(word, all_words, max_dist=len(word) // 2))
+        if not distances:
+            distances = [(0, all_words[0])]
+        best_word = distances[0][1]
         print(word, best_word)
         return vocabulary[best_word]
         

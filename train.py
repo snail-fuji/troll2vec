@@ -42,7 +42,8 @@ np.random.seed(0)
 # Model type. See Kim Yoon's Convolutional Neural Networks for Sentence Classification, Section 3
 model_type = "CNN-non-static"  # CNN-rand|CNN-non-static|CNN-static
 
-model_path = 'model-center-loss.h5py'
+model_path = 'model.h5py'
+parameters_path = "parameters.json"
 
 # Data source
 data_source = "local_dir"  # keras_data_set|local_dir
@@ -75,7 +76,7 @@ def save_parameters(vocabulary_inv, max_length):
         "vocabulary": vocabulary,
         "max_length": max_length
     }
-    json.dump(json_dict, open("parameters.json", "w"))
+    json.dump(json_dict, open(parameters_path, "w"))
 
 def load_data(data_source):
     assert data_source in ["keras_data_set", "local_dir"], "Unknown data source"
