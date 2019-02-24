@@ -1,0 +1,12 @@
+pandas==0.23.1
+tensorflow==1.12.0
+fuzzywuzzy==0.16.0
+nltk==3.2.5
+gensim==3.4.0
+python-Levenshtein==0.12.0
+distance==0.3.1
+sklearn
+keras
+flask
+flask_cors
+gunicorn
