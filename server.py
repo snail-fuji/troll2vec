@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import predictions
 from flask_cors import CORS
+from werkzeug.contrib.fixers import ProxyFix
 
 app = Flask(__name__)
 CORS(app)
@@ -25,6 +26,7 @@ def predict():
   else:
     return jsonify([])
 
+predictions.init()
+app.wsgi_app = ProxyFix(app.wsgi_app)
 if __name__ == '__main__':
-  predictions.init()
-  app.run(port=5000, debug=True)
+  app.run(host='0.0.0.0', port=5000, debug=True)
