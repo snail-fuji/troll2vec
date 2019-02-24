@@ -41,6 +41,7 @@ def prepare_sentences(sentences, vocabulary, max_length):
   return x
 
 def predict(sentences):
+  global vocabulary, max_length, model
   sentences = prepare_sentences(sentences, vocabulary, max_length)
   predictions = make_predictions(model, sentences)
   return predictions
