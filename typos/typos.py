@@ -47,7 +47,7 @@ def init(init_vocabulary, test=False):
       unique_characters, jaccard_index = create_jaccard_index(all_words)
       jaccard_index_lengths = sps.linalg.norm(jaccard_index, axis=1)
 
-def find_closest_by_jaccard(word, size=100):
+def find_closest_by_jaccard(word, size=200):
     global jaccard_index, all_words, unique_characters, jaccard_index_lengths
 
     chars_indices = get_word_indices(word, unique_characters)
