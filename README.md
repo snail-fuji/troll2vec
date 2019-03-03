@@ -24,13 +24,8 @@ $ python3 ./server.py
 
 Example of server response goes below:
 ```bash
-$ curl -XPOST -d '{"messages": ["Your mom is so fat", "Your mom is so cool"]}' localhost:5000/api
-{
-  "toxicity": [
-    true, 
-    false
-  ]
-}
+$ curl -XPOST -d '{"id1": "Your mom is so fat", "id2": "Your mom is so cool"}' localhost:5000/api
+["id1"]
 ```
 
 # Convolutional neural network
@@ -40,7 +35,7 @@ For "CNN-rand" and "CNN-non-static" gets to 88-90%, and "CNN-static" - 85%
 
 ## Some difference from original article:
 * larger corpus, longer sentences; sentence length is very important, just like data size
-* smaller embedding dimension, 20 instead of 300
+* smaller embedding dimension, 50 instead of 300
 * 2 filter sizes instead of original 3
 * much fewer filters; experiments show that 3-10 is enough; original work uses 100
 * random initialization is no worse than word2vec init on IMDB corpus

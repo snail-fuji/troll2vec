@@ -4,11 +4,9 @@ import gensim.downloader as api
 from os.path import join, exists, split
 import os
 import numpy as np
+import gensim.downloader as api
 
-rus = True
-
-def train_word2vec(sentence_matrix, vocabulary_inv,
-                   num_features=300, min_word_count=1, context=10):
+def train_word2vec(sentence_matrix, vocabulary_inv, num_features=300, min_word_count=1, context=10, gensim_model=None):
     """
     Trains, saves, loads Word2Vec model
     Returns initial weights for embedding layer.
@@ -23,9 +21,8 @@ def train_word2vec(sentence_matrix, vocabulary_inv,
     model_dir = 'models'
     model_name = "{:d}features_{:d}minwords_{:d}context".format(num_features, min_word_count, context)
     model_name = join(model_dir, model_name)
-    if rus:
-        embedding_model = api.load('word2vec-ruscorpora-300')
-        print('Load russian Word2Vec model')
+    if gensim_model:
+        embedding_model = api.load(gensim_model)
     elif exists(model_name):
         embedding_model = word2vec.Word2Vec.load(model_name)
         print('Load existing Word2Vec model \'%s\'' % split(model_name)[-1])
@@ -60,7 +57,6 @@ def train_word2vec(sentence_matrix, vocabulary_inv,
 
 if __name__ == '__main__':
     import data_helpers
-
     print("Loading data...")
     x, _, _, vocabulary_inv_list = data_helpers.load_data()
     vocabulary_inv = {key: value for key, value in enumerate(vocabulary_inv_list)}
