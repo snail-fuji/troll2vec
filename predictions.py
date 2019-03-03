@@ -1,5 +1,6 @@
+
 from keras.models import load_model
-from data_helpers import pad_sentences, build_vocab, build_input_data, clean_str, lemmatize_text, remove_stopwords, remove_short_words
+from data_helpers import pad_sentences, build_vocab, build_input_data, clean_str
 import json
 
 import tensorflow as tf
@@ -31,7 +32,7 @@ def make_predictions(model, sentences):
     return model.predict(sentences).reshape(-1)
 
 def process_sentences(sentences):
-  return [lemmatize_text(clean_str(s.strip()))[:-2].lower().split() for s in sentences]
+  return [clean_str(s.strip()).split() for s in sentences]
 
 def prepare_sentences(sentences, vocabulary, max_length):
   print(sentences)
@@ -43,7 +44,7 @@ def prepare_sentences(sentences, vocabulary, max_length):
 def predict(sentences):
   global vocabulary, max_length, model
   sentences = prepare_sentences(sentences, vocabulary, max_length)
-  predictions = make_predictions(model, sentences, threshold)
+  predictions = make_predictions(model, sentences)
   return predictions
 
 def init():

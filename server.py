@@ -9,7 +9,6 @@ CORS(app)
 
 def delete_empty_messages(messages):
   filtered_messages = {}
-  print(messages)
   for key, message in messages.items():
     if message.strip():
       filtered_messages[key] = message
@@ -18,9 +17,7 @@ def delete_empty_messages(messages):
 
 @app.route('/api', methods=['POST'])
 def predict():
-  response = request.get_json(force=True)
-  messages = response['messages']
-  threshold = response["threshold"]
+  messages = request.get_json(force=True)
   messages = delete_empty_messages(messages)
   keys = list(messages.keys())
   values = [messages[key] for key in keys]

@@ -1,10 +1,10 @@
 from __future__ import print_function
 from gensim.models import word2vec
-import gensim.downloader as api
 from os.path import join, exists, split
 import os
 import numpy as np
 import gensim.downloader as api
+
 
 def train_word2vec(sentence_matrix, vocabulary_inv, num_features=300, min_word_count=1, context=10, gensim_model=None):
     """

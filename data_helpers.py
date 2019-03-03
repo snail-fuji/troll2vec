@@ -11,56 +11,12 @@ from typos import typos
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
 
-
 ip_regex = re.compile("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 time_regex = re.compile("")
 symbols_regex = re.compile("([.?!,:\"]+)")
 spaces_regex = re.compile("\s+")
 brackets_regex = re.compile("[()]")
-m = Mystem()
-word_regex = re.compile("[^А-Яа-я]+")
-stop_words = stopwords.words('russian')
 MIN_LENGTH = 2
-
-def remove_stopwords(text):
-    return [word for word in text if word not in stop_words]
-
-def remove_short_words(text):
-    word_regex = re.compile("[^А-Яа-я]+")
-    return [
-        word for word in text 
-        if len(word_regex.sub("", word)) > MIN_LENGTH
-    ]
-
-def word_description(word):
-    analysis = m.analyze(word)
-    try:
-        main_info = analysis[0]['analysis'][0]['gr']
-        parts = {
-            "SPRO": "PNOUN", 
-            "ADV": "ADV", 
-            "CONJ": "CCONJ", 
-            "PART": "PART", 
-            "INTJ": "INTJ", 
-            "PR": "PRON", 
-            "A": "ADJ",
-            "S": "NOUN", 
-            "V": "VERB",
-            "NUM": "NUM"
-        }
-        for part in parts:
-            if part in main_info:
-                return "_" + parts[part]
-    except:
-        pass
-    return ""
-
-
-def lemmatize_text(text):
-    string = []
-    for word in m.lemmatize(text):
-        string.append("{}{}".format(word, word_description(word)))
-    return " ".join(string)
 
 
 def preprocess_comment(comment):
