@@ -182,7 +182,6 @@ if __name__ == "__main__":
         weights = np.array([v for v in embedding_weights.values()])
         print("Initializing embedding layer with word2vec weights, shape", weights.shape)
         embedding_layer = model.get_layer("embedding")
-        print(weights)
         embedding_layer.set_weights([weights])
 
     # Train the model
