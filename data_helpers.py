@@ -7,33 +7,20 @@ from tqdm import tqdm
 from fuzzywuzzy import fuzz
 import numpy as np
 from typos import typos 
+from preprocess.preprocess import preprocess_text
 """
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
 
-ip_regex = re.compile("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
-time_regex = re.compile("")
-symbols_regex = re.compile("([.?!,:\"]+)")
-spaces_regex = re.compile("\s+")
-brackets_regex = re.compile("[()]")
-MIN_LENGTH = 2
-
-
-def preprocess_comment(comment):
-    comment = ip_regex.sub("", comment)
-    comment = comment.replace("\n", " ").lower()
-    comment = symbols_regex.sub(" \\1 ", comment)
-    comment = brackets_regex.sub(" ", comment)
-    comment = spaces_regex.sub(" ", comment)
-    return comment.strip()
-
+positive_dataset_path = "./data/toxicity.pos"
+negative_dataset_path = "./data/toxicity.neg"
 
 def clean_str(string):
     """
     Tokenization/string cleaning for all datasets except for SST.
     Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     """
-    string = preprocess_comment(string)
+    string = preprocess_text(string)
     string = re.sub(r"[^A-Za-zА-Яа-я0-9(),!?\'\`\_]", " ", string)
     string = re.sub(r"\'s", " \'s", string)
     string = re.sub(r"\'ve", " \'ve", string)
@@ -56,9 +43,9 @@ def load_data_and_labels():
     Returns split sentences and labels.
     """
     # Load data from files
-    positive_examples = list(open("./data/toxicity.pos").readlines())
+    positive_examples = list(open(positive_dataset_path).readlines())
     positive_examples = [s.strip() for s in positive_examples]
-    negative_examples = list(open("./data/toxicity.neg").readlines())
+    negative_examples = list(open(negative_dataset_path).readlines())
     negative_examples = [s.strip() for s in negative_examples]
     # Split by words
     x_text = positive_examples + negative_examples

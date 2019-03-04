@@ -44,12 +44,13 @@ model_type = "CNN-non-static"  # CNN-rand|CNN-non-static|CNN-static
 
 model_path = 'model.h5py'
 parameters_path = "parameters.json"
+gensim_model = "word2vec-ruscorpora-300"
 
 # Data source
 data_source = "local_dir"  # keras_data_set|local_dir
 
 # Model Hyperparameters
-embedding_dim = 50
+embedding_dim = 300
 filter_sizes = (3, 8)
 num_filters = 10
 dropout_prob = (0.5, 0.8)
@@ -127,7 +128,7 @@ if __name__ == "__main__":
     print("Model type is", model_type)
     if model_type in ["CNN-non-static", "CNN-static"]:
         embedding_weights = train_word2vec(np.vstack((x_train, x_test)), vocabulary_inv, num_features=embedding_dim,
-                                           min_word_count=min_word_count, context=context)
+                                           min_word_count=min_word_count, context=context, gensim_model=gensim_model)
         if model_type == "CNN-static":
             x_train = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_train])
             x_test = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_test])
@@ -181,6 +182,7 @@ if __name__ == "__main__":
         weights = np.array([v for v in embedding_weights.values()])
         print("Initializing embedding layer with word2vec weights, shape", weights.shape)
         embedding_layer = model.get_layer("embedding")
+        print(weights)
         embedding_layer.set_weights([weights])
 
     # Train the model
