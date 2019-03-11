@@ -11,11 +11,18 @@ Related to [the extension](https://github.com/lexaich/SNAT)
 First, download dataset, preprocess it and train a model.
 
 ```bash
+# Outdated, use toxicity.pos and toxicity.neg from repo instead
+
 $ kaggle competitions download jigsaw-toxic-comment-classification-challenge
 $ unzip train.csv.zip
 $ jupyter nbconvert --execute ./dataset.ipynb
+```
+
+Then execute:
+```bash
 $ python3 ./train.py
 ```
+
 After these steps you will be able to run flask server
 
 ```bash
@@ -24,8 +31,11 @@ $ python3 ./server.py
 
 Example of server response goes below:
 ```bash
-$ curl -XPOST -d '{"id1": "Your mom is so fat", "id2": "Your mom is so cool"}' localhost:5000/api
-["id1"]
+$ curl -XPOST -d '{"id1": "Дальше вы не пройдете, пока не получите бумаги", "id2": "Ваша мать дает"}' localhost:5000/api
+{
+  "id1": 0.03455933555960655,
+  "id2": 0.4351857006549835
+}
 ```
 
 # Convolutional neural network
