@@ -8,6 +8,7 @@ from fuzzywuzzy import fuzz
 import numpy as np
 from typos import typos 
 from preprocess.preprocess import preprocess_text
+import json
 """
 Original taken from https://github.com/dennybritz/cnn-text-classification-tf
 """
@@ -21,20 +22,7 @@ def clean_str(string):
     Original taken from https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py
     """
     string = preprocess_text(string)
-    string = re.sub(r"[^A-Za-zА-Яа-я0-9(),!?\'\`\_]", " ", string)
-    string = re.sub(r"\'s", " \'s", string)
-    string = re.sub(r"\'ve", " \'ve", string)
-    string = re.sub(r"n\'t", " n\'t", string)
-    string = re.sub(r"\'re", " \'re", string)
-    string = re.sub(r"\'d", " \'d", string)
-    string = re.sub(r"\'ll", " \'ll", string)
-    string = re.sub(r",", " , ", string)
-    string = re.sub(r"!", " ! ", string)
-    string = re.sub(r"\(", " \( ", string)
-    string = re.sub(r"\)", " \) ", string)
-    string = re.sub(r"\?", " \? ", string)
-    string = re.sub(r"\s{2,}", " ", string)
-    return string.strip().lower()
+    return string.strip()
 
 
 def load_data_and_labels():
@@ -50,6 +38,7 @@ def load_data_and_labels():
     # Split by words
     x_text = positive_examples + negative_examples
     x_text = [clean_str(sent) for sent in tqdm(x_text, desc="cleaning sentences")]
+    print(x_text)
     x_text = [s.split(" ") for s in tqdm(x_text, desc="splitting sentences")]
     # Generate labels
     positive_labels = [[0, 1] for _ in positive_examples]

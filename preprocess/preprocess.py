@@ -24,8 +24,8 @@ def normalize_text(text):
     return text.lower().strip()
 
 def get_pos_tag(word):
-  analysis = stemmer.analyze(word)
   try:
+      analysis = stemmer.analyze(word)
       main_info = analysis[0]['analysis'][0]['gr']
       parts = {
           "SPRO": "PRON", 
@@ -48,8 +48,11 @@ def get_pos_tag(word):
 
 def lemmatize_text(text):
     string = []
-    for word in stemmer.lemmatize(text)[0:-1]:
-        string.append("{}{}".format(word, get_pos_tag(word)))
+    try:
+        for word in stemmer.lemmatize(text)[0:-1]:
+            string.append("{}{}".format(word, get_pos_tag(word)))
+    except:
+        print("Exception in: {}".format(text))
     return "".join(string)
 
 

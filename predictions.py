@@ -35,7 +35,6 @@ def process_sentences(sentences):
   return [clean_str(s.strip()).split() for s in sentences]
 
 def prepare_sentences(sentences, vocabulary, max_length):
-  print(sentences)
   sentences_processed = process_sentences(sentences)
   sentences_padded, _ = pad_sentences(sentences_processed, sequence_length=max_length)
   x, _ = build_input_data(sentences_padded, 0, vocabulary)
