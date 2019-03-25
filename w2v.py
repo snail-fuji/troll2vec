@@ -48,11 +48,20 @@ def train_word2vec(sentence_matrix, vocabulary_inv, num_features=300, min_word_c
         print('Saving Word2Vec model \'%s\'' % split(model_name)[-1])
         embedding_model.save(model_name)
 
+    # add words from model to vocabulary_inv
+    vocabulary = {w: i for i, w in vocabulary_inv.items()}
+    for word in embedding_model.wv.vocab:
+        if word not in vocabulary:
+            vocabulary[word] = len(vocabulary)
+
+    print("{} words in total".format(len(vocabulary)))
+    vocabulary_inv = {i: w for w, i in vocabulary.items()}
+
     # add unknown words
     embedding_weights = {key: embedding_model[word] if word in embedding_model else
                               np.random.uniform(-0.25, 0.25, embedding_model.vector_size)
                          for key, word in vocabulary_inv.items()}
-    return embedding_weights
+    return embedding_weights, vocabulary_inv
 
 
 if __name__ == '__main__':

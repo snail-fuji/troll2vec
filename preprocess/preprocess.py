@@ -50,7 +50,7 @@ def lemmatize_text(text):
     string = []
     try:
         for word in stemmer.lemmatize(text)[0:-1]:
-            string.append("{}{}".format(word, get_pos_tag(word)))
+            string.append("{}".format(word))
     except:
         print("Exception in: {}".format(text))
     return "".join(string)

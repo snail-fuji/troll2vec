@@ -38,7 +38,6 @@ def load_data_and_labels():
     # Split by words
     x_text = positive_examples + negative_examples
     x_text = [clean_str(sent) for sent in tqdm(x_text, desc="cleaning sentences")]
-    print(x_text)
     x_text = [s.split(" ") for s in tqdm(x_text, desc="splitting sentences")]
     # Generate labels
     positive_labels = [[0, 1] for _ in positive_examples]

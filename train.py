@@ -44,13 +44,13 @@ model_type = "CNN-non-static"  # CNN-rand|CNN-non-static|CNN-static
 
 model_path = 'model.h5py'
 parameters_path = "parameters.json"
-gensim_model = "word2vec-ruscorpora-300"
+gensim_model = None # "word2vec-ruscorpora-300"
 
 # Data source
 data_source = "local_dir"  # keras_data_set|local_dir
 
 # Model Hyperparameters
-embedding_dim = 300
+embedding_dim = 50
 filter_sizes = (3, 8)
 num_filters = 10
 dropout_prob = (0.5, 0.8)
@@ -58,7 +58,7 @@ hidden_dims = 50
 
 # Training parameters
 batch_size = 256
-num_epochs = 10 # Change on production
+num_epochs = 20 # Change on production
 
 # Prepossessing parameters
 sequence_length = 400
@@ -113,9 +113,6 @@ if __name__ == "__main__":
     print("Load data...")
     x_train, y_train, x_test, y_test, vocabulary_inv, max_length = load_data(data_source)
 
-    # Save model parameters
-    save_parameters(vocabulary_inv, max_length)
-
     if sequence_length != x_test.shape[1]:
         print("Adjusting sequence length for actual size")
         sequence_length = x_test.shape[1]
@@ -127,7 +124,7 @@ if __name__ == "__main__":
     # Prepare embedding layer weights and convert inputs for static model
     print("Model type is", model_type)
     if model_type in ["CNN-non-static", "CNN-static"]:
-        embedding_weights = train_word2vec(np.vstack((x_train, x_test)), vocabulary_inv, num_features=embedding_dim,
+        embedding_weights, vocabulary_inv = train_word2vec(np.vstack((x_train, x_test)), vocabulary_inv, num_features=embedding_dim,
                                            min_word_count=min_word_count, context=context, gensim_model=gensim_model)
         if model_type == "CNN-static":
             x_train = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_train])
@@ -153,6 +150,7 @@ if __name__ == "__main__":
         z = model_input
     else:
         z = Embedding(len(vocabulary_inv), embedding_dim, input_length=sequence_length, name="embedding")(model_input)
+        z.trainable = False
 
     z = Dropout(dropout_prob[0])(z)
 
@@ -183,6 +181,9 @@ if __name__ == "__main__":
         print("Initializing embedding layer with word2vec weights, shape", weights.shape)
         embedding_layer = model.get_layer("embedding")
         embedding_layer.set_weights([weights])
+
+    # Save model parameters
+    save_parameters(vocabulary_inv, max_length)
 
     # Train the model
     model.fit(x_train, y_train, batch_size=batch_size, epochs=num_epochs,
