@@ -5,7 +5,12 @@ setup(name='troll2vec',
       description='First version of TrollBlock project model',
       author='TrollBlock',
       license='MIT',
-      packages=['troll2vec'],
+      packages=[
+            'troll2vec',
+            'troll2vec/preprocess',
+            'troll2vec/typos',
+            'toll2vec/tests'
+      ],
       install_requires=[
             'pandas==0.23.1',
             'tensorflow==1.12.0',
